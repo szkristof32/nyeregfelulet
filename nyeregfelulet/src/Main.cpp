@@ -15,6 +15,11 @@
 #include "NyeregGenerator.h"
 #include "Shader.h"
 
+static void OpenGLErrorCallback(GLenum source, GLenum type, GLenum id, GLenum severity, GLsizei length, const char* message, const void* userParam)
+{
+	std::cerr << "OpenGL error: " << message;
+}
+
 int main()
 {
 	setlocale(LC_ALL, "");
@@ -34,12 +39,20 @@ int main()
 	success = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 	assert(success && "Glad inicializáció nem sikerült...");
 
-	NyeregGenerator generator(10);
+#ifdef DEBUG
+	glEnable(GL_DEBUG_OUTPUT);
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+	glDebugMessageCallback(OpenGLErrorCallback, nullptr);
+
+	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
+#endif
+
+	NyeregGenerator* generator = new NyeregGenerator(10);
 
 	Shader shader("assets/shaders/nyeregShader.glsl");
 
 	glm::mat4 projection = glm::perspective(glm::radians(70.0f), 1600.0f / 900.0f, 0.1f, 100.0f);
-	glm::mat4 view = glm::mat4(1.0f);
+	glm::mat4 view = glm::lookAt(glm::vec3{ 0.0f, 2.0f, -3.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f });
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -49,22 +62,24 @@ int main()
 		shader.LoadMat4("projection", projection);
 		shader.LoadMat4("view", view);
 
-		generator.GetVertexArray().Bind();
-		generator.GetIndexBuffer().Bind();
+		generator->GetVertexArray().Bind();
+		generator->GetIndexBuffer().Bind();
 
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
-		glDrawElements(GL_TRIANGLES, generator.GetVertexCount(), GL_UNSIGNED_INT, nullptr);
+		glDrawElements(GL_TRIANGLES, generator->GetVertexCount(), GL_UNSIGNED_INT, nullptr);
 		glDisableVertexAttribArray(1);
 		glDisableVertexAttribArray(0);
 
-		generator.GetVertexArray().Unbind();
-		generator.GetIndexBuffer().Unbind();
+		generator->GetVertexArray().Unbind();
+		generator->GetIndexBuffer().Unbind();
 
 		shader.Stop();
 
 		glfwSwapBuffers(window);
 	}
+
+	delete generator;
 
 	glfwDestroyWindow(window);
 	glfwTerminate();

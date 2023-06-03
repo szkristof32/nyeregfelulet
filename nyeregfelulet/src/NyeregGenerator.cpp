@@ -8,12 +8,16 @@ NyeregGenerator::NyeregGenerator(uint32_t density)
 {
 	Generate(density);
 
+	m_VertexArray.Bind();
+
 	m_VertexBuffer.StoreData(m_Vertices.data(), (uint32_t)m_Vertices.size() * sizeof(Vertex));
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(Vertex), (const void*)offsetof(Vertex, Position));
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, sizeof(Vertex), (const void*)offsetof(Vertex, Normal));
 	m_VertexBuffer.Unbind();
 
+	m_IndexBuffer.Bind();
 	m_IndexBuffer.StoreData(m_Indices.data(), (uint32_t)m_Indices.size() * sizeof(uint32_t));
+	m_IndexBuffer.Unbind();
 }
 
 void NyeregGenerator::Generate(uint32_t density)

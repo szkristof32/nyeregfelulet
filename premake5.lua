@@ -94,7 +94,7 @@ project "nyeregfelulet"
 		systemversion "latest"
 
 	filter "configurations:Debug"
-		defines "WZ_DEBUG"
+		defines "DEBUG"
 		runtime "Debug"
 		symbols "on"
 		
@@ -106,7 +106,7 @@ project "nyeregfelulet"
 		}
 	
 	filter "configurations:Release"
-		defines "WZ_RELEASE"
+		defines "RELEASE"
 		runtime "Release"
 		optimize "on"
 		
